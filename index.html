@@ -98,9 +98,37 @@
         productVersion: "0.1",
         matchWebGLToCanvasSize: true
       }).then(function (unityInstance) {
+        window.unityInstance = unityInstance;
         if (loadingBar) loadingBar.style.display = "none";
       }).catch(function (message) {
         alert("Unity WebGL Error: " + message);
+      });
+
+      // 支援直接將 .zip 專案包拖曳至瀏覽器視窗自動匯入
+      window.addEventListener('dragover', function (e) {
+        e.preventDefault();
+      });
+      window.addEventListener('drop', function (e) {
+        e.preventDefault();
+        var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+        if (file && file.name.toLowerCase().endsWith('.zip')) {
+          var reader = new FileReader();
+          reader.onload = function (evt) {
+            var bytes = new Uint8Array(evt.target.result);
+            var tempPath = '/uploaded_project.zip';
+            try {
+              if (typeof FS !== 'undefined' && FS.writeFile) {
+                FS.writeFile(tempPath, bytes);
+                if (window.unityInstance) {
+                  window.unityInstance.SendMessage('EditorController', 'OnWebZipUploaded', tempPath);
+                }
+              }
+            } catch (err) {
+              console.error('[WebDrop] Error handling dropped zip:', err);
+            }
+          };
+          reader.readAsArrayBuffer(file);
+        }
       });
     </script>
   </body>
