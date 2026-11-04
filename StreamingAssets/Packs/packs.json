@@ -1,0 +1,62 @@
+{
+  "packs": [
+    {
+      "packId": "pack_shironeri",
+      "packName": "SHIRONERI",
+      "subtitle": "白練之初",
+      "sector": "Sector Single",
+      "description": "",
+      "themeColorHex": "#FCFAF2",
+      "songFolderNames": [
+        "Song_000",
+        "Song_014_Breather",
+        "Song_002_Smile",
+        "Song_013_Volition",
+        "Song_011_Good End",
+        "Song_012_Take out my mind",
+        "Song_010_FRENZY☆SHINY"
+      ],
+      "coverFileName": "cover_shironeri.png"
+    },
+    {
+      "packId": "pack_usubeni",
+      "packName": "USUBENI",
+      "subtitle": "薄望紅塵",
+      "sector": "Sector I",
+      "description": "",
+      "themeColorHex": "#E87A90",
+      "songFolderNames": [
+        "Song_003_Blossom Message",
+        "Song_004_満開の先"
+      ],
+      "coverFileName": "cover_usubeni.png"
+    },
+    {
+      "packId": "pack_ruri",
+      "packName": "RURI",
+      "subtitle": "星翼琉璃",
+      "sector": "Sector II",
+      "description": "",
+      "themeColorHex": "#1E50A2",
+      "songFolderNames": [
+        "Song_006_Book of Stars",
+        "Song_007_World of Starry",
+        "Song_008_Fantasia Sonata Stars",
+        "Song_009_氷結の翼"
+      ],
+      "coverFileName": ""
+    },
+    {
+      "packId": "pack_entan",
+      "packName": "ENTAN",
+      "subtitle": "丹鉛赫則",
+      "sector": "Side Sector I",
+      "description": "",
+      "themeColorHex": "#D75455",
+      "songFolderNames": [
+        "Song_005_Aleph-0"
+      ],
+      "coverFileName": "cover_entan.png"
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Frave - Web Chart Editor</title>
+    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes">
+    <style>
+      html, body {
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+        background-color: #0b0d11;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, monospace;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+      #unity-container {
+        width: 100%;
+        height: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+      }
+      #unity-canvas {
+        width: 100%;
+        height: 100%;
+        background-color: #0b0d11;
+        display: block;
+      }
+      #unity-loading-bar {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        color: #e2e8f0;
+        font-size: 13px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+      }
+      .loading-title {
+        color: #8bb2f8;
+        font-weight: 700;
+        margin-bottom: 6px;
+      }
+      .loading-sub {
+        color: #64748b;
+        font-size: 11px;
+        margin-bottom: 16px;
+        letter-spacing: 1.5px;
+      }
+      #unity-progress-bar-empty {
+        width: 260px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.08);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      #unity-progress-bar-full {
+        width: 0%;
+        height: 100%;
+        background: #3b82f6;
+        box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
+        transition: width 0.15s ease-out;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="unity-container">
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
+      <div id="unity-loading-bar">
+        <div class="loading-title">Frave Chart Editor</div>
+        <div class="loading-sub">Loading Web Engine...</div>
+        <div id="unity-progress-bar-empty">
+          <div id="unity-progress-bar-full"></div>
+        </div>
+      </div>
+    </div>
+    <script src="Build/WebGL_Editor.loader.js"></script>
+    <script>
+      var canvas = document.querySelector("#unity-canvas");
+      var loadingBar = document.querySelector("#unity-loading-bar");
+      var progressBarFull = document.querySelector("#unity-progress-bar-full");
+
+      createUnityInstance(canvas, {
+        arguments: [],
+        dataUrl: "Build/WebGL_Editor.data",
+        frameworkUrl: "Build/WebGL_Editor.framework.js",
+        codeUrl: "Build/WebGL_Editor.wasm",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "Mistyr4in_",
+        productName: "Frave",
+        productVersion: "0.1",
+        matchWebGLToCanvasSize: true
+      }).then(function (unityInstance) {
+        if (loadingBar) loadingBar.style.display = "none";
+      }).catch(function (message) {
+        alert("Unity WebGL Error: " + message);
+      });
+    </script>
+  </body>
+</html>
