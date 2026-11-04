@@ -68,6 +68,31 @@
         box-shadow: 0 0 10px rgba(59, 130, 246, 0.6);
         transition: width 0.15s ease-out;
       }
+      #web-upload-pill {
+        position: fixed;
+        top: 12px;
+        right: 18px;
+        z-index: 1000;
+        background: rgba(18, 22, 28, 0.88);
+        color: #8bb2f8;
+        border: 1px solid rgba(139, 178, 248, 0.4);
+        border-radius: 20px;
+        padding: 7px 15px;
+        font-size: 12.5px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+        transition: all 0.2s ease;
+      }
+      #web-upload-pill:hover, #web-upload-pill:active {
+        background: rgba(30, 41, 59, 0.95);
+        border-color: #60a5fa;
+        color: #ffffff;
+        transform: translateY(-1px);
+      }
     </style>
   </head>
   <body>
@@ -81,11 +106,20 @@
         </div>
       </div>
     </div>
+
+    <!-- 原生 HTML 檔案選擇器 (針對 iPad / Safari 100% 防擋彈窗) -->
+    <input id="webgl-file-input" type="file" accept=".zip,application/zip,application/x-zip-compressed" style="display: none;">
+    <button id="web-upload-pill" onclick="document.getElementById('webgl-file-input').click()">
+      📁 選擇 .ZIP 專案 (iPad / 雲端)
+    </button>
+
     <script src="Build/WebGL_Editor.loader.js"></script>
     <script>
       var canvas = document.querySelector("#unity-canvas");
       var loadingBar = document.querySelector("#unity-loading-bar");
       var progressBarFull = document.querySelector("#unity-progress-bar-full");
+      var fileInput = document.getElementById('webgl-file-input');
+      var uploadPill = document.getElementById('web-upload-pill');
 
       createUnityInstance(canvas, {
         arguments: [],
@@ -104,7 +138,36 @@
         alert("Unity WebGL Error: " + message);
       });
 
-      // 支援直接將 .zip 專案包拖曳至瀏覽器視窗自動匯入
+      function handleZipFile(file) {
+        if (!file) return;
+        if (uploadPill) uploadPill.innerText = "⏳ 載入中: " + file.name + "...";
+        var reader = new FileReader();
+        reader.onload = function (evt) {
+          var bytes = new Uint8Array(evt.target.result);
+          var tempPath = '/uploaded_project.zip';
+          try {
+            if (typeof FS !== 'undefined' && FS.writeFile) {
+              FS.writeFile(tempPath, bytes);
+              if (window.unityInstance) {
+                window.unityInstance.SendMessage('EditorController', 'OnWebZipUploaded', tempPath);
+                if (uploadPill) uploadPill.innerText = "📁 選擇 .ZIP 專案 (iPad / 雲端)";
+              }
+            }
+          } catch (err) {
+            console.error('[WebFile] Error handling zip:', err);
+            if (uploadPill) uploadPill.innerText = "❌ 載入失敗";
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      fileInput.onchange = function (e) {
+        var file = e.target.files && e.target.files[0];
+        handleZipFile(file);
+        fileInput.value = '';
+      };
+
+      // 支援桌面端將 .zip 專案包直接拖曳至瀏覽器視窗自動匯入
       window.addEventListener('dragover', function (e) {
         e.preventDefault();
       });
@@ -112,22 +175,7 @@
         e.preventDefault();
         var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
         if (file && file.name.toLowerCase().endsWith('.zip')) {
-          var reader = new FileReader();
-          reader.onload = function (evt) {
-            var bytes = new Uint8Array(evt.target.result);
-            var tempPath = '/uploaded_project.zip';
-            try {
-              if (typeof FS !== 'undefined' && FS.writeFile) {
-                FS.writeFile(tempPath, bytes);
-                if (window.unityInstance) {
-                  window.unityInstance.SendMessage('EditorController', 'OnWebZipUploaded', tempPath);
-                }
-              }
-            } catch (err) {
-              console.error('[WebDrop] Error handling dropped zip:', err);
-            }
-          };
-          reader.readAsArrayBuffer(file);
+          handleZipFile(file);
         }
       });
     </script>
