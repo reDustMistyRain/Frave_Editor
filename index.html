@@ -140,23 +140,63 @@
 
       function handleZipFile(file) {
         if (!file) return;
+        if (!window.unityInstance) {
+          alert("編輯器尚未載入完成，請等待載入完成後再選取檔案！");
+          return;
+        }
         if (uploadPill) uploadPill.innerText = "⏳ 載入中: " + file.name + "...";
+
         var reader = new FileReader();
         reader.onload = function (evt) {
-          var bytes = new Uint8Array(evt.target.result);
-          var tempPath = '/uploaded_project.zip';
           try {
-            if (typeof FS !== 'undefined' && FS.writeFile) {
-              FS.writeFile(tempPath, bytes);
-              if (window.unityInstance) {
-                window.unityInstance.SendMessage('EditorController', 'OnWebZipUploaded', tempPath);
+            var bytes = new Uint8Array(evt.target.result);
+            var tempPath = '/uploaded_project.zip';
+
+            // 方法 1: 使用 WebFileBridge 注入的 window.UnityWriteUploadedZip
+            if (typeof window.UnityWriteUploadedZip === 'function') {
+              var ok = window.UnityWriteUploadedZip(bytes);
+              if (ok) {
                 if (uploadPill) uploadPill.innerText = "📁 選擇 .ZIP 專案 (iPad / 雲端)";
+                return;
               }
             }
+
+            // 方法 2: 使用 window.UnityFS 或 window.FS 或 Module.FS
+            var fs = window.UnityFS || window.FS;
+            if (!fs && window.unityInstance && window.unityInstance.Module) {
+              fs = window.unityInstance.Module.FS;
+            }
+            if (fs && typeof fs.writeFile === 'function') {
+              try { fs.unlink(tempPath); } catch (e) {}
+              fs.writeFile(tempPath, bytes);
+              window.unityInstance.SendMessage('EditorController', 'OnWebZipUploaded', tempPath);
+              if (uploadPill) uploadPill.innerText = "📁 選擇 .ZIP 專案 (iPad / 雲端)";
+              return;
+            }
+
+            // 方法 3: 使用 Module.FS_createDataFile
+            var mod = window.unityInstance && window.unityInstance.Module;
+            if (mod && typeof mod.FS_createDataFile === 'function') {
+              try {
+                if (mod.FS && mod.FS.unlink) mod.FS.unlink(tempPath);
+              } catch (e) {}
+              mod.FS_createDataFile('/', 'uploaded_project.zip', bytes, true, true, true);
+              window.unityInstance.SendMessage('EditorController', 'OnWebZipUploaded', tempPath);
+              if (uploadPill) uploadPill.innerText = "📁 選擇 .ZIP 專案 (iPad / 雲端)";
+              return;
+            }
+
+            throw new Error("無法存取 WebGL 檔案系統 (FS)");
           } catch (err) {
             console.error('[WebFile] Error handling zip:', err);
             if (uploadPill) uploadPill.innerText = "❌ 載入失敗";
+            alert("載入失敗: " + (err.message || err));
           }
+        };
+        reader.onerror = function (err) {
+          console.error('[WebFile] FileReader error:', err);
+          if (uploadPill) uploadPill.innerText = "❌ 檔案讀取失敗";
+          alert("檔案讀取失敗，請確認檔案未損壞");
         };
         reader.readAsArrayBuffer(file);
       }
