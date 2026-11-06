@@ -107,8 +107,10 @@
       </div>
     </div>
 
-    <!-- 原生 HTML 檔案選擇器 (針對 iPad / Safari 100% 防擋彈窗) -->
+    <!-- 原生 HTML 檔案與資料夾選擇器 (針對 iPad / Safari 100% 防擋彈窗) -->
     <input id="webgl-file-input" type="file" accept=".zip,application/zip,application/x-zip-compressed" style="display: none;">
+    <input id="webgl-zip-input" type="file" accept=".zip,application/zip,application/x-zip-compressed" style="display: none;">
+    <input id="webgl-folder-input" type="file" webkitdirectory directory multiple style="display: none;">
     <button id="web-upload-pill" onclick="document.getElementById('webgl-file-input').click()">
       📁 選擇 .ZIP 專案 (iPad / 雲端)
     </button>
